@@ -16,9 +16,6 @@ export default {
 </script>
 
 <style>
-html {
-  height: 100%;
-}
 
 body {
   background: #424f63;
@@ -27,26 +24,5 @@ body {
   font-size: 14px;
   overflow-x: hidden;
   line-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#app {
-  color: #2c3e50;
-  margin-top: -100px;
-  max-width: 600px;
-  font-family: Source Sans Pro, Helvetica, sans-serif;
-  text-align: center;
-}
-
-#app a {
-  color: #42b983;
-  text-decoration: none;
-}
-
-.logo {
-  width: 100px;
-  height: 100px
 }
 </style>
