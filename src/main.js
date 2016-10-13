@@ -5,6 +5,8 @@ import VueResource from 'vue-resource'
 import routerConfig from './routers'
 import store from '../vuex/store'
 import VueEditable from './vue-editable.js'
+import 'keen-ui/dist/keen-ui.css'
+import 'material-design-icons/iconfont/material-icons.css'
 
 /* eslint-disable no-new */
 Vue.use(VueEditable)
