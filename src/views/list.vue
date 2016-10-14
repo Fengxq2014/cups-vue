@@ -1,5 +1,7 @@
 <template>
     <div id="list">
+    <el-input placeholder="请输入内容" icon="search" v-model="queryString"></el-input>
+    <el-button type="primary"  @click.native="dialogVisible = true" :plain="true" icon="plus">增加</el-button>
 	<table class="pure-table">
 		<thead>
 			<tr>
@@ -8,7 +10,7 @@
 		</thead>
 
 		<tbody>
-			<tr v-for="(card, index) in cardList" :class="{'pure-table-odd':index%2==1}">
+			<tr v-for="(card, index) in filteredData" :class="{'pure-table-odd':index%2==1}">
 				<td @dblclick="editable($event,'AccNo',card)">{{card.AccNo}}</td>
 				<td @dblclick="editable($event,'AccPwd',card)">{{card.AccPwd}}</td>
 				<td @dblclick="editable($event,'Track2',card)">{{card.Track2}}</td>
@@ -20,9 +22,64 @@
 			</tr>
 		</tbody>
 	</table>
-    <ui-alert type="success">
-                Okilly dokilly, your account was updated successfully.
-            </ui-alert>
+    <template>
+    <el-table
+        :data="filteredData"
+        selection-mode="card"
+        style="width: 100%"
+        allow-no-selection>
+        <el-table-column
+        type="index"
+        width="50">
+        </el-table-column>
+        <el-table-column
+        property="AccNo"
+        label="卡号"
+        width="120">
+        </el-table-column>
+        <el-table-column
+        property="AccPwd"
+        label="密码"
+        width="120">
+        </el-table-column>
+        <el-table-column
+        property="Balance"
+        label="地址">
+        </el-table-column>
+    </el-table>
+    </template>
+    <el-dialog title="提示" v-model="dialogVisible" size="small">
+        <el-form :model="card" label-position="top">
+            <el-form-item label="卡号">
+                <el-input v-model="card.AccNo" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密  码">
+                <el-input v-model="card.AccPwd" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="金额">
+                <el-input v-model="card.Balance" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="IC数据">
+                <el-input type="textarea" v-model="card.EmvData" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="开卡行号">
+                <el-input v-model="card.OpenCardBankId" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="开卡省号">
+                <el-input v-model="card.OpenCardProvId" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="Track2">
+                <el-input type="textarea" v-model="card.Track2" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="Track3">
+                <el-input type="textarea" v-model="card.Track3" auto-complete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click.native="handleSubmit">确 定</el-button>
+            <el-button @click.native="dialogVisible = false">取 消</el-button>
+        </span>
+    </el-dialog>
     </div>
 </template>
 <style>
@@ -33,7 +90,6 @@
         top: 0px;
         left: 0;
         right: 0;
-        position: fixed;
         overflow-x: auto;
         margin-left: 150px;
         background-color: #ffffff;
@@ -41,36 +97,83 @@
     .pure-table {
         width: 100%;
         table-layout: fixed;
+        margin-top: 10px
     }
     .pure-table td {
         text-overflow: ellipsis;
         overflow: hidden;
         min-width: 100px;
     }
+    .el-input {
+        float: left;
+        margin-right: 30px
+    }
 </style>
 <script>
-    import { mapGetters } from 'vuex'
-    import {UiAlert} from 'keen-ui'
+    import { mapGetters, mapActions } from 'vuex'
     export default({
-      computed: mapGetters({
-        cardList: 'getCardList'
-      }),
+      data () {
+        return {
+          queryString: '',
+          dialogVisible: false,
+          card: {
+            AccNo: '',
+            AccPwd: null,
+            Balance: null,
+            EmvData: '',
+            OpenCardBankId: '',
+            OpenCardProvId: '',
+            Track2: '',
+            Track3: ''
+          },
+          rules: {
+            name: [
+              {required: true, message: '请输入内容', trigger: 'blur'}
+            ]
+          }
+        }
+      },
+      computed: {
+        ...mapGetters({
+          cardList: 'getCardList',
+          ajaxState: 'getAjaxState'
+        }),
+        filteredData: function () {
+          var filterKey = this.queryString && this.queryString.toLowerCase()
+          var data = this.cardList
+          if (filterKey) {
+            data = data.filter(function (row) {
+              return Object.keys(row).some(function (key) {
+                return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+              })
+            })
+          }
+          return data
+        }
+      },
       methods: {
+        handleReset () {
+        },
+        handleSubmit (ev) {
+        },
         editable: function (e, field, item) {
           var that = this
           that.$editable(e, function (value) {
-            that.$store.dispatch('putCard', JSON.stringify(item))
-            console.log(value, field, JSON.stringify(item))
-            that.$Notification.success('编辑成功', '', 500)
+            that.putCard(JSON.stringify(item)).then(console.log(12))
           })
-        }
+        },
+        showNotify: function () {
+          this.$notify({title: '成功', message: '这是一条成功的提示消息', type: this.ajaxState})
+        },
+        ...mapActions([
+          'putCard',
+          'changeListQueryString'
+        ])
       },
       created () {
-        console.log(UiAlert)
         this.$store.dispatch('fetchCardList')
       },
       components: {
-        UiAlert
       }
     })
 </script>

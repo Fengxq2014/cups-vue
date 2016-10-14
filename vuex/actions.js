@@ -171,7 +171,9 @@ export const putCard = ({commit}, data) => {
   return _put({ url, data }, commit)
     .then((json) => {
       if (json) {
-        return commit('')
+        console.log(555)
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
       }
       return Promise.reject(new Error('putCard failure'))
     })

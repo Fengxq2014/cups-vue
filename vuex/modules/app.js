@@ -5,6 +5,7 @@ import {
 
 const state = {
   leftNavState: false,
+  ajaxState: 'error',
   loading: false,
   menuSelected: 1,
   jsonData: {},
@@ -26,6 +27,12 @@ export const mutations = {
   },
   FETCH_CARD_LIST (state, data) {
     state.cardList = data
+  },
+  CHANGE_AJAXSTATE (state, ajaxState) {
+    state.ajaxState = ajaxState
+  },
+  CHANGE_LISTQUERYSTRING (state, key) {
+    state.listQueryString = key
   }
 }
 
