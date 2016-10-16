@@ -1,7 +1,10 @@
 <template>
     <div id="list">
     <el-input placeholder="请输入内容" icon="search" v-model="queryString"></el-input>
-    <el-button type="primary"  @click.native="dialogVisible = true" :plain="true" icon="plus">增加</el-button>
+    <el-button type="primary"  @click.native="newDialogVisible = true" :plain="true" icon="plus">增加</el-button>
+    <el-button type="primary"  @click.native="dialogVisible = true" :plain="true" icon="document">查看</el-button>
+    <el-button type="primary"  @click.native="dialogVisible = true" :plain="true" icon="edit">修改</el-button>
+    <el-button type="primary"  @click.native="dialogVisible = true" :plain="true" icon="delete">删除</el-button>
 	<table class="pure-table">
 		<thead>
 			<tr>
@@ -25,13 +28,11 @@
     <template>
     <el-table
         :data="filteredData"
-        selection-mode="card"
+        selection-mode="single"
         style="width: 100%"
+        border
+        @selectionchange="handleSelectionChange"
         allow-no-selection>
-        <el-table-column
-        type="index"
-        width="50">
-        </el-table-column>
         <el-table-column
         property="AccNo"
         label="卡号"
@@ -39,40 +40,91 @@
         </el-table-column>
         <el-table-column
         property="AccPwd"
-        label="密码"
-        width="120">
+        label="密码">
         </el-table-column>
         <el-table-column
         property="Balance"
-        label="地址">
+        label="金额">
+        </el-table-column>
+        <el-table-column
+        property="Track2"
+        label="二磁">
+        </el-table-column>
+        <el-table-column
+        property="Track3"
+        label="三磁">
+        </el-table-column>
+        <el-table-column
+        property="EmvData"
+        label="IC数据">
+        </el-table-column>
+        <el-table-column
+        property="OpenCardBankId"
+        label="开卡行号">
+        </el-table-column>
+        <el-table-column
+        property="OpenCardProvId"
+        label="开卡省号">
         </el-table-column>
     </el-table>
     </template>
-    <el-dialog title="提示" v-model="dialogVisible" size="small">
-        <el-form :model="card" label-position="top">
+    <el-dialog title="newDialogVisible" v-model="newDialogVisible" size="small">
+        <el-form :model="newCard" label-position="top">
             <el-form-item label="卡号">
-                <el-input v-model="card.AccNo" auto-complete="off"></el-input>
+                <el-input v-model="newCard.AccNo" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="密  码">
-                <el-input v-model="card.AccPwd" auto-complete="off"></el-input>
+                <el-input v-model="newCard.AccPwd" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="金额">
-                <el-input v-model="card.Balance" auto-complete="off"></el-input>
+                <el-input v-model="newCard.Balance" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="IC数据">
-                <el-input type="textarea" v-model="card.EmvData" auto-complete="off"></el-input>
+                <el-input type="textarea" v-model="newCard.EmvData" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="开卡行号">
-                <el-input v-model="card.OpenCardBankId" auto-complete="off"></el-input>
+                <el-input v-model="newCard.OpenCardBankId" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="开卡省号">
-                <el-input v-model="card.OpenCardProvId" auto-complete="off"></el-input>
+                <el-input v-model="newCard.OpenCardProvId" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="Track2">
-                <el-input type="textarea" v-model="card.Track2" auto-complete="off"></el-input>
+                <el-input type="textarea" v-model="newCard.Track2" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="Track3">
-                <el-input type="textarea" v-model="card.Track3" auto-complete="off"></el-input>
+                <el-input type="textarea" v-model="newCard.Track3" auto-complete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click.native="handleSubmit">确 定</el-button>
+            <el-button @click.native="newDialogVisible = false">取 消</el-button>
+        </span>
+    </el-dialog>
+    <el-dialog title="查看卡" v-model="dialogVisible" size="small">
+        <el-form :model="newCard" label-position="top">
+            <el-form-item label="卡号">
+                <el-input v-model="newCard.AccNo" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密  码">
+                <el-input v-model="newCard.AccPwd" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="金额">
+                <el-input v-model="newCard.Balance" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="IC数据">
+                <el-input type="textarea" v-model="newCard.EmvData" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="开卡行号">
+                <el-input v-model="newCard.OpenCardBankId" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="开卡省号">
+                <el-input v-model="newCard.OpenCardProvId" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="Track2">
+                <el-input type="textarea" v-model="newCard.Track2" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="Track3">
+                <el-input type="textarea" v-model="newCard.Track3" auto-complete="off"></el-input>
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -115,8 +167,9 @@
       data () {
         return {
           queryString: '',
-          dialogVisible: false,
-          card: {
+          newDialogVisible: false,
+          editCard: {},
+          newCard: {
             AccNo: '',
             AccPwd: null,
             Balance: null,
@@ -152,6 +205,9 @@
         }
       },
       methods: {
+        handleSelectionChange (value) {
+          this.editCard = value
+        },
         handleReset () {
         },
         handleSubmit (ev) {
