@@ -7,9 +7,11 @@ const state = {
   leftNavState: false,
   ajaxState: 'error',
   loading: false,
+  showMenu: false,
   menuSelected: 1,
   jsonData: {},
-  cardList: []
+  cardList: [],
+  userList: []
 }
 
 export const mutations = {
@@ -19,6 +21,12 @@ export const mutations = {
   [FINISH_LOADING] (state) {
     state.loading = false
   },
+  SHOW_MENU (state) {
+    state.showMenu = true
+  },
+  HIDE_MENU (state) {
+    state.showMenu = false
+  },
   CHANGE_MENU_SELECTED (state, selectedID) {
     state.menuSelected = selectedID
   },
@@ -27,6 +35,9 @@ export const mutations = {
   },
   FETCH_CARD_LIST (state, data) {
     state.cardList = data
+  },
+  FETCH_USER_LIST (state, data) {
+    state.userList = data
   },
   CHANGE_AJAXSTATE (state, ajaxState) {
     state.ajaxState = ajaxState

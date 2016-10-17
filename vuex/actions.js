@@ -33,7 +33,21 @@ const _put = ({ url, data }, commit) => {
   let _url = `${config.apiurl}/${url}`
   return vue.http.put(_url, data)
     .then((res) => {
-      console.log(res)
+      if (commit) commit('FINISH_LOADING')
+      if (res.status >= 200 && res.status < 300) {
+        return res.data
+      }
+      return Promise.reject(new Error(res.status))
+    }, (err) => {
+      console.log(err)
+    })
+}
+
+const _post = ({ url, data }, commit) => {
+  if (commit) commit('START_LOADING')
+  let _url = `${config.apiurl}/${url}`
+  return vue.http.post(_url, data)
+    .then((res) => {
       if (commit) commit('FINISH_LOADING')
       if (res.status >= 200 && res.status < 300) {
         return res.data
@@ -135,6 +149,14 @@ export const changeMenuState = ({commit}, selectedID) => {
   commit('CHANGE_MENU_SELECTED', selectedID)
 }
 
+export const showMenu = ({commit}) => {
+  commit('SHOW_MENU')
+}
+
+export const hideMenu = ({commit}) => {
+  commit('HIDE_MENU')
+}
+
 export const fetchJsonData = ({commit}) => {
   const url = 'swagger/swagger.json'
   return _get({ url }, commit)
@@ -166,16 +188,60 @@ export const fetchCardList = ({commit}) => {
     })
 }
 
+export const fetchUserList = ({commit}) => {
+  const url = 'cups/user'
+  return _get({ url }, commit)
+    .then((json) => {
+      if (json) {
+        return commit('FETCH_USER_LIST', json)
+      }
+      return Promise.reject(new Error('FETCH_JSON_DATA failure'))
+    })
+    .catch((error) => {
+      // commit('FETCH_TOPIC_LISTS_FAILURE', topicTab, page)
+      return Promise.reject(error)
+    })
+}
+
 export const putCard = ({commit}, data) => {
   const url = `cups/card/update/`
   return _put({ url, data }, commit)
     .then((json) => {
-      if (json) {
-        console.log(555)
+      if (json && json.retCode === '0000') {
         commit('CHANGE_AJAXSTATE', 'success')
         return Promise.resolve()
       }
-      return Promise.reject(new Error('putCard failure'))
+      return Promise.reject(json.retMsg)
+    })
+    .catch((error) => {
+      return Promise.reject(error)
+    })
+}
+
+export const postCard = ({commit}, data) => {
+  const url = `cups/card/`
+  return _post({ url, data }, commit)
+    .then((json) => {
+      if (json && json.retCode === '0000') {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json.retMsg)
+    })
+    .catch((error) => {
+      return Promise.reject(error)
+    })
+}
+
+export const postUser = ({commit}, data) => {
+  const url = `cups/user/`
+  return _post({ url, data }, commit)
+    .then((json) => {
+      if (json && json.retCode === '0000') {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json.retMsg)
     })
     .catch((error) => {
       return Promise.reject(error)

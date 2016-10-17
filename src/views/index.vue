@@ -1,17 +1,16 @@
 <template>
     <div>
-    <LeftMenu></LeftMenu>
+    <!--<LeftMenu></LeftMenu>-->
+    <!--<router-view></router-view>-->
     <List></List>
     </div>
 </template>
 
 <script>
-import LeftMenu from '../components/menu'
-import List from './list'
+import List from '../components/list'
 
 export default {
   components: {
-    LeftMenu,
     List
   }
 }
