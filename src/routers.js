@@ -1,8 +1,7 @@
 export default [{
   path: '/',
   name: 'index',
-  showMenu: true,
-  component: require('./views/index')
+  component: require('./components/List')
 }, {
   path: '/login',
   name: 'login',
@@ -11,5 +10,13 @@ export default [{
   path: '/user',
   name: 'user',
   component: require('./components/userList')
+}, {
+  path: '/card',
+  name: 'card',
+  component: require('./components/List')
+}, {
+  path: '/trans',
+  name: 'trans',
+  component: require('./components/transList')
 }
 ]

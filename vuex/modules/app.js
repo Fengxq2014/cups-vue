@@ -11,7 +11,8 @@ const state = {
   menuSelected: 1,
   jsonData: {},
   cardList: [],
-  userList: []
+  userList: [],
+  transList: []
 }
 
 export const mutations = {
@@ -38,6 +39,9 @@ export const mutations = {
   },
   FETCH_USER_LIST (state, data) {
     state.userList = data
+  },
+  FETCH_TRANS_LIST (state, data) {
+    state.transList = data
   },
   CHANGE_AJAXSTATE (state, ajaxState) {
     state.ajaxState = ajaxState

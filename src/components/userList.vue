@@ -140,6 +140,9 @@
       methods: {
         handleSelectionChange (value) {
           this.editUser = value
+          if (value === null) {
+            this.editUser = {}
+          }
         },
         handleReset () {
         },
@@ -159,27 +162,34 @@
             })
         },
         deleteUser () {
-          this.$confirm('此操作将删除' + this.editUser.AccNo + '，是否继续?', '提示', {type: 'warning'})
+          this.$confirm('此操作将删除' + this.editUser.Name + '，是否继续?', '提示', {type: 'warning'})
+          .then(() => {
+            return this.$store.dispatch('deleteUser', this.editUser.Card)
+          })
           .then(() => {
             this.$message({
               type: 'success',
               message: '删除成功'
             })
+            this.editCard = {}
+            this.$store.dispatch('fetchUserList')
+          }, (err) => {
+            this.showError(err)
           })
           .catch(() => {
             this.showInfo('取消删除')
           })
         },
         updateUser: function () {
-          this.updateCardData = this.omitBy(this.updateCardData)
-          let data = _.assign(this.editUser, this.updateCardData)
+          this.updateUserData = this.omitBy(this.updateUserData)
+          let data = _.assign(this.editUser, this.updateUserData)
           console.log(data)
           this.putUser(JSON.stringify(data))
           .then(() => {
             this.showNotify()
             this.editDialogVisible = false
-            this.obClean(this.updateCardData)
-            this.$store.dispatch('fetchCardList')
+            this.obClean(this.updateUserData)
+            this.$store.dispatch('fetchUserList')
           }, (ret) => {
             this.showError(ret)
           })
@@ -236,6 +246,7 @@
       },
       created () {
         this.$store.dispatch('fetchUserList')
+        this.$store.dispatch('changeMenuState', 1)
       },
       components: {
       }

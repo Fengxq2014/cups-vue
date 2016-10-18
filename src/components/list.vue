@@ -4,26 +4,6 @@
     <el-button type="primary"  @click.native="newDialogVisible = true" :plain="true" icon="plus">增加</el-button>
     <el-button type="primary"  @click.native="editDialogVisible = true" :plain="true" icon="edit">修改</el-button>
     <el-button type="primary"  @click.native="deleteCard" :plain="true" icon="delete">删除</el-button>
-	<table class="pure-table">
-		<thead>
-			<tr>
-				<th v-for="(value, key) in cardList[0]">{{key}}</th>
-			</tr>
-		</thead>
-
-		<tbody>
-			<tr v-for="(card, index) in filteredData" :class="{'pure-table-odd':index%2==1}">
-				<td @dblclick="editable($event,'AccNo',card)">{{card.AccNo}}</td>
-				<td @dblclick="editable($event,'AccPwd',card)">{{card.AccPwd}}</td>
-				<td @dblclick="editable($event,'Track2',card)">{{card.Track2}}</td>
-				<td @dblclick="editable($event,'Track3',card)">{{card.Track3}}</td>
-				<td @dblclick="editable($event,'EmvData',card)">{{card.EmvData}}</td>
-				<td @dblclick="editable($event,'Balance',card)">{{card.Balance}}</td>
-				<td @dblclick="editable($event,'OpenCardBankId',card)">{{card.OpenCardBankId}}</td>
-				<td @dblclick="editable($event,'OpenCardProvId',card)">{{card.OpenCardProvId}}</td>
-			</tr>
-		</tbody>
-	</table>
     <template>
     <el-table
         :data="filteredData"
@@ -204,6 +184,9 @@
       methods: {
         handleSelectionChange (value) {
           this.editCard = value
+          if (value === null) {
+            this.editCard = {}
+          }
         },
         handleReset () {
         },
@@ -214,6 +197,7 @@
               this.showNotify()
               this.newDialogVisible = false
               this.obClean(this.newCard)
+              this.editCard = {}
               this.$store.dispatch('fetchCardList')
             }, (ret) => {
               this.showError(ret)
@@ -226,10 +210,17 @@
         deleteCard () {
           this.$confirm('此操作将删除' + this.editCard.AccNo + '，是否继续?', '提示', {type: 'warning'})
           .then(() => {
+            return this.$store.dispatch('deleteCard', this.editCard.AccNo)
+          })
+          .then(() => {
             this.$message({
               type: 'success',
               message: '删除成功'
             })
+            this.editCard = {}
+            this.$store.dispatch('fetchCardList')
+          }, (err) => {
+            this.showError(err)
           })
           .catch(() => {
             this.showInfo('取消删除')
@@ -238,13 +229,12 @@
         updateCard: function () {
           this.updateCardData = this.omitBy(this.updateCardData)
           let data = _.assign(this.editCard, this.updateCardData)
-          console.log(data)
           this.putCard(JSON.stringify(data))
           .then(() => {
             this.showNotify()
             this.editDialogVisible = false
-            this.obClean(this.updateCardData)
             this.$store.dispatch('fetchCardList')
+            this.obClean(this.updateCardData)
           }, (ret) => {
             this.showError(ret)
           })
@@ -273,18 +263,6 @@
             ob[x] = null
           }
         },
-        editable: function (e, field, item) {
-          var that = this
-          that.$editable(e, function (value) {
-            that.putCard(JSON.stringify(item))
-            .then(() => {
-              that.showNotify()
-            })
-            .catch((e) => {
-              this.showError(e)
-            })
-          })
-        },
         showNotify: function () {
           this.$notify({title: '成功', message: '', type: this.ajaxState})
         },
@@ -301,7 +279,7 @@
       },
       created () {
         this.$store.dispatch('fetchCardList')
-        this.$store.dispatch('showMenu')
+        this.$store.dispatch('changeMenuState', 0)
       },
       components: {
       }

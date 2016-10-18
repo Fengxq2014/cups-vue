@@ -1,5 +1,5 @@
 import vue from 'vue'
-import {config} from '../src/config'
+import {config} from '../static/config'
 /**
  * Created by zhengguorong on 16/6/22.
  */
@@ -25,6 +25,9 @@ const _get = ({ url, query }, commit) => {
         return res.data
       }
       return Promise.reject(new Error(res.status))
+    }, (err) => {
+      if (commit) commit('FINISH_LOADING')
+      console.log(err)
     })
 }
 
@@ -39,6 +42,7 @@ const _put = ({ url, data }, commit) => {
       }
       return Promise.reject(new Error(res.status))
     }, (err) => {
+      if (commit) commit('FINISH_LOADING')
       console.log(err)
     })
 }
@@ -54,6 +58,23 @@ const _post = ({ url, data }, commit) => {
       }
       return Promise.reject(new Error(res.status))
     }, (err) => {
+      if (commit) commit('FINISH_LOADING')
+      console.log(err)
+    })
+}
+
+const _delete = ({ url, data }, commit) => {
+  if (commit) commit('START_LOADING')
+  let _url = `${config.apiurl}/${url}/${data}`
+  return vue.http.delete(_url)
+    .then((res) => {
+      if (commit) commit('FINISH_LOADING')
+      if (res.status >= 200 && res.status < 300) {
+        return res.data
+      }
+      return Promise.reject(new Error(res.status))
+    }, (err) => {
+      if (commit) commit('FINISH_LOADING')
       console.log(err)
     })
 }
@@ -203,8 +224,38 @@ export const fetchUserList = ({commit}) => {
     })
 }
 
+export const fetchTransList = ({commit}) => {
+  const url = 'cups/trans'
+  return _get({ url }, commit)
+    .then((json) => {
+      if (json) {
+        return commit('FETCH_TRANS_LIST', json)
+      }
+      return Promise.reject(new Error('FETCH_JSON_DATA failure'))
+    })
+    .catch((error) => {
+      // commit('FETCH_TOPIC_LISTS_FAILURE', topicTab, page)
+      return Promise.reject(error)
+    })
+}
+
 export const putCard = ({commit}, data) => {
-  const url = `cups/card/update/`
+  const url = `cups/card/`
+  return _put({ url, data }, commit)
+    .then((json) => {
+      if (json && json.retCode === '0000') {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json.retMsg)
+    })
+    .catch((error) => {
+      return Promise.reject(error)
+    })
+}
+
+export const putUser = ({commit}, data) => {
+  const url = `cups/user/`
   return _put({ url, data }, commit)
     .then((json) => {
       if (json && json.retCode === '0000') {
@@ -234,7 +285,7 @@ export const postCard = ({commit}, data) => {
 }
 
 export const postUser = ({commit}, data) => {
-  const url = `cups/user/`
+  const url = `cups/user`
   return _post({ url, data }, commit)
     .then((json) => {
       if (json && json.retCode === '0000') {
@@ -242,6 +293,51 @@ export const postUser = ({commit}, data) => {
         return Promise.resolve()
       }
       return Promise.reject(json.retMsg)
+    })
+    .catch((error) => {
+      return Promise.reject(error)
+    })
+}
+
+export const deleteCard = ({commit}, data) => {
+  const url = `cups/card`
+  return _delete({ url, data }, commit)
+    .then((json) => {
+      if (json && json.retCode === '0000') {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json.retMsg)
+    })
+    .catch((err) => {
+      return Promise.reject(err)
+    })
+}
+
+export const deleteUser = ({commit}, data) => {
+  const url = `cups/user`
+  return _delete({ url, data }, commit)
+    .then((json) => {
+      if (json && json.retCode === '0000') {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json.retMsg)
+    })
+    .catch((err) => {
+      return Promise.reject(err)
+    })
+}
+
+export const login = ({commit}, data) => {
+  const url = `https://kpi.seuic.info/api/login`
+  return vue.http.post(url, data, {headers: {'Custom-Auth-Name': data.account}})
+    .then((json) => {
+      if (json && json.data && json.data.result === true) {
+        commit('CHANGE_AJAXSTATE', 'success')
+        return Promise.resolve()
+      }
+      return Promise.reject(json)
     })
     .catch((error) => {
       return Promise.reject(error)

@@ -1,24 +1,47 @@
 <template>
 	<div class="container">
-		<form class="form-signin" id="login-form">
+		<form  @submit.prevent class="form-signin" id="login-form">
 			<div class="form-signin-heading text-center">
 				<h1 class="sign-title">登录cups管理平台</h1>
 				<img src="/static/img/logo.png" alt="cups" style="width:120px;" /> </div>
 			<div class="login-wrap">
-            <input type="text" value="libai" class="form-control" name="username" placeholder="请填写用户名,默认:libai" autofocus>
-            <input type="password" value="123456" class="form-control" name="password" placeholder="请填写密码,默认:123456">
-            <!--<p>用户名和密码：libai,123456。请勿修改</p>-->
-            <button class="btn btn-lg btn-login btn-block" @click="sub()" type="submit"> 登录</button>
+            <input type="text" v-model="account" class="form-control" name="username" placeholder="请填写用户名" autofocus>
+            <input type="password" v-model="password1" class="form-control" name="password" placeholder="请填写密码">
+            <button class="btn btn-lg btn-login btn-block" @click="sub()"> 登录</button>
 			</div>
 		</form>
 	</div>
 </template>
 
 <script>
+    import md5 from 'md5'
+    import cookie from 'tiny-cookie'
     export default({
+      data () {
+        return {
+          account: '',
+          password1: ''
+        }
+      },
+      computed: {
+        password: function () {
+          return md5(this.password1)
+        }
+      },
       methods: {
         sub: function () {
-          console.log('sdf')
+          this.$store.dispatch('login', {account: this.account, password: this.password})
+            .then(() => {
+              cookie.set('login', this.password, { expires: '20m' })
+              window.location = '/#/'
+            }, (err) => {
+              this.$notify({title: '失败', message: '登录失败', type: 'error'})
+              console.log('失败' + err)
+            })
+            .catch((err) => {
+              console.log(err)
+              this.$notify({title: '失败', message: '登录失败', type: 'error'})
+            })
         }
       }
     })
@@ -32,6 +55,9 @@
         font-size: 14px;
         overflow-x: hidden;
         line-height: 20px;
+    }
+    .app-color{
+        background-color: #424f63 !important;
     }
     .container{
         width: 750px;

@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{'app-color':showMenu===false}">
     <LeftMenu v-show="showMenu"></LeftMenu>
     <router-view></router-view>
     <div v-loading.fullscreen="loading"></div>
@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import Hello from './components/Hello'
 import { mapGetters } from 'vuex'
 import LeftMenu from 'components/menu'
 
@@ -24,7 +23,6 @@ export default {
     }
   },
   components: {
-    Hello,
     LeftMenu
   }
 }
